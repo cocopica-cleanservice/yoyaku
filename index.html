@@ -86,7 +86,6 @@ async function submitReservation(){
     await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({
       name:state.form.name,kana:state.form.kana,address:state.form.address,phone:state.form.phone,
       slots:state.slots.map((s,i)=>`第${"一二三"[i]}希望：${s.label}`),
-      confirmedSlot:state.form.confirmedSlot!=null?state.slots[state.form.confirmedSlot]?.label:"未確定",
       cleaning:state.form.menu.map(x=>AC_OPTIONS.includes(x)?`${x}×${state.form.count[x]||1}台`:x),
       cleaningNote:state.form.note,
     })});
@@ -371,7 +370,7 @@ function buildCal(){
     });
     slist.appendChild(btn({width:"100%",marginTop:"12px",padding:"13px",borderRadius:"10px",border:"none",
       background:C.accent,color:"#fff",fontSize:"14px",fontWeight:"700",
-      boxShadow:"0 3px 12px rgba(26,79,160,0.3)"},()=>setState({step:"form"}),"お客様情報を入力する →"));
+      boxShadow:"0 3px 12px rgba(26,79,160,0.3)"},()=>{setState({step:"form"});setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),50);},"お客様情報を入力する →"));
     wrap.appendChild(slist);
   }
   return wrap;
@@ -498,22 +497,7 @@ function buildConfirm(){
   });
   wrap.appendChild(card);
 
-  // 確定日時を1つ選ぶ（管理者向け確認画面にのみ表示）
-  const confBox=div({background:"#fff8e8",borderRadius:"12px",padding:"14px 16px",
-    border:"1px solid #f6d03a",marginBottom:"14px"});
-  confBox.appendChild(div({fontSize:"13px",fontWeight:"700",color:"#7a5a10",marginBottom:"10px"},"📅 確定する日時を1つ選んでください"));
-  state.slots.forEach((s,i)=>{
-    const row=div({display:"flex",alignItems:"center",gap:"10px",padding:"8px 0",
-      borderBottom:i<state.slots.length-1?"1px solid rgba(246,208,58,0.3)":"none"});
-    const rb=h("input",{type:"radio",name:"confirmSlot",value:String(i),
-      style:{width:"18px",height:"18px",accentColor:C.accent}});
-    if(state.form.confirmedSlot===i) rb.checked=true;
-    rb.addEventListener("change",()=>{state.form.confirmedSlot=i;});
-    row.appendChild(rb);
-    row.appendChild(div({fontSize:"13px",color:"#7a5a10"},`第${"一二三"[i]}希望：${s.label}`));
-    confBox.appendChild(row);
-  });
-  wrap.appendChild(confBox);
+
 
   wrap.appendChild(div({background:C.accentL,borderRadius:"12px",padding:"13px 15px",
     border:`1px solid ${C.accentM}`,fontSize:"13px",color:C.accent,lineHeight:"1.8",marginBottom:"16px"},
