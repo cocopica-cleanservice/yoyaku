@@ -344,7 +344,10 @@ function buildCal(){
       border:`1px solid ${C.border}`,overflow:"hidden",boxShadow:"0 2px 12px rgba(0,0,0,0.05)"});
     const shead=div({padding:"12px 16px 10px",borderBottom:`1px solid ${C.border}`,
       display:"flex",alignItems:"center",justifyContent:"space-between"});
-    shead.appendChild(div({fontSize:"15px",fontWeight:"700"},`${state.mo}月${d}日（${WEEKDAY[dow]}）`));
+    const stitle=div({display:"flex",flexDirection:"column",gap:"2px"});
+    stitle.appendChild(div({fontSize:"15px",fontWeight:"700"},`${state.mo}月${d}日（${WEEKDAY[dow]}）`));
+    stitle.appendChild(div({fontSize:"11px",color:C.warn,fontWeight:"600"},"⏰ 開始時間を選んでください"));
+    shead.appendChild(stitle);
     shead.appendChild(div({fontSize:"11px",color:state.slots.length>=3?C.warn:C.muted},
       state.slots.length>=3?"3枠選択済み（上限）":`あと${3-state.slots.length}枠選べます`));
     // 終日ボタン
@@ -665,11 +668,13 @@ function buildAdminModal(){
     modal.appendChild(div({fontSize:"13px",fontWeight:"700",color:C.mid,marginBottom:"6px"},"日付（複数選択可）"));
     const di=h("input",{type:"date",style:{width:"100%",padding:"11px 12px",borderRadius:"10px",
       border:`1.5px solid ${C.border}`,fontSize:"14px",marginBottom:"8px"}});
+    di.value="";
     di.addEventListener("change",e=>{
       const d=e.target.value;
-      if(d&&!state.blockDate.split(",").filter(Boolean).includes(d))
+      if(!d) return;
+      if(!state.blockDate.split(",").filter(Boolean).includes(d))
         setState({blockDate:state.blockDate?state.blockDate+","+d:d});
-      e.target.value="";
+      setTimeout(()=>{di.value="";},0);
     });
     modal.appendChild(di);
     if(state.blockDate){
