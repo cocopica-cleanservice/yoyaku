@@ -85,7 +85,7 @@ async function submitReservation(){
   try{
     await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({
       name:state.form.name,kana:state.form.kana,address:state.form.address,phone:state.form.phone,
-      slots:state.slots.map((s,i)=>`第${"一二三"[i]}希望：${s.label}`),
+      slots:state.slots.map((s,i)=>`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`),
       cleaning:state.form.menu.map(x=>AC_OPTIONS.includes(x)?`${x}×${state.form.count[x]||1}台`:x),
       cleaningNote:state.form.note,
     })});
@@ -118,7 +118,10 @@ function isPast(d){return new Date(state.yr,state.mo-1,d)<new Date(today.getFull
 function isToday(d){return state.yr===today.getFullYear()&&state.mo===today.getMonth()+1&&d===today.getDate();}
 function slotSt(d,h){const day=state.resv[dkey(state.yr,state.mo,d)]||{};return (day[h]||day[String(h)]||{}).status||"available";}
 function availCnt(d){return HOURS.filter(h=>slotSt(d,h)==="available").length;}
-function isSlotSel(d,h){return state.slots.some(s=>s.date===dkey(state.yr,state.mo,d)&&s.hour===h);}
+function isSlotSel(d,h){
+  const k=dkey(state.yr,state.mo,d);
+  return state.slots.some(s=>s.date===k&&(s.allDay||s.hour===h));
+}
 function selCntDay(d){return state.slots.filter(s=>s.date===dkey(state.yr,state.mo,d)).length;}
 
 function toggleSlot(d,h){
@@ -126,8 +129,14 @@ function toggleSlot(d,h){
   const dow=new Date(state.yr,state.mo-1,d).getDay();
   const label=`${state.mo}月${d}日（${WEEKDAY[dow]}）${String(h).padStart(2,"0")}:00〜${String(h+1).padStart(2,"0")}:00`;
   const exists=state.slots.some(s=>s.date===k&&s.hour===h);
-  if(exists) setState({slots:state.slots.filter(s=>!(s.date===k&&s.hour===h))});
-  else if(state.slots.length<3) setState({slots:[...state.slots,{date:k,hour:h,label}]});
+  if(exists){
+    setState({slots:state.slots.filter(s=>!(s.date===k&&s.hour===h))});
+  } else {
+    // 日付単位で3日まで・同日は複数OK
+    const uniqueDates=[...new Set(state.slots.map(s=>s.date))];
+    if(!uniqueDates.includes(k)&&uniqueDates.length>=3) return;
+    setState({slots:[...state.slots,{date:k,hour:h,label}]});
+  }
 }
 
 function toggleMenu(item){
@@ -334,18 +343,51 @@ function buildCal(){
       display:"flex",alignItems:"center",justifyContent:"space-between"});
     shead.appendChild(div({fontSize:"15px",fontWeight:"700"},`${state.mo}月${d}日（${WEEKDAY[dow]}）`));
     shead.appendChild(div({fontSize:"11px",color:state.slots.length>=3?C.warn:C.muted},
-      state.slots.length>=3?"3つ選択済み（上限）":`あと${3-state.slots.length}つ選べます`));
+      [...new Set(state.slots.map(s=>s.date))].length>=3?"3日選択済み（上限）":`あと${3-[...new Set(state.slots.map(s=>s.date))].length}日選べます`));
+    // 終日ボタン
+    // 終日ボタン：全選択/全解除トグル
+    const allAvail=HOURS.filter(h=>slotSt(d,h)==="available");
+    const todayKey=dkey(state.yr,state.mo,d);
+    const allSel=state.slots.some(s=>s.date===todayKey&&s.allDay);
+    shead.appendChild(btn({
+      background:allSel?"#ffe8e8":C.accentL,
+      border:`1px solid ${allSel?"#f7a0a0":C.accentM}`,
+      color:allSel?"#c0392b":C.accent,
+      borderRadius:"6px",padding:"3px 10px",fontSize:"11px",fontWeight:"700"},
+      ()=>{
+        if(allSel){
+          // 全解除：この日のスロットを全部削除
+          setState({slots:state.slots.filter(s=>s.date!==todayKey)});
+        } else {
+          // 日付単位で3つまで
+          const uniqueDates=[...new Set(state.slots.map(s=>s.date))];
+          if(!uniqueDates.includes(todayKey)&&uniqueDates.length>=3) return;
+          const otherSlots=state.slots.filter(s=>s.date!==todayKey);
+          const dow=new Date(state.yr,state.mo-1,d).getDay();
+          const allDaySlot={
+            date:todayKey,hour:9,allDay:true,
+            label:`${state.mo}月${d}日（${WEEKDAY[dow]}）9:00〜17:00（終日）`
+          };
+          setState({slots:[...otherSlots,allDaySlot]});
+        }
+      },allSel?"終日解除":"終日"));
     sbox.appendChild(shead);
     const sgrid=div({display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"8px",padding:"12px"});
     HOURS.forEach(h=>{
       const st=slotSt(d,h),avail=st==="available",pend=st==="pending",sel=isSlotSel(d,h);
+      // 終日選択中かチェック
+      const todayKey2=dkey(state.yr,state.mo,d);
+      const allAvail2=HOURS.filter(h2=>slotSt(d,h2)==="available");
+      const isAllDay=state.slots.some(s=>s.date===todayKey2&&s.allDay);
       const sb=btn({borderRadius:"10px",padding:"11px 6px",
         background:sel?C.accent:avail?C.card:pend?"#fffbeb":"#f0f0f0",
         border:`1.5px solid ${sel?C.accent:avail?C.accentM:pend?"#f59e0b":C.border}`,
         color:sel?"#fff":avail?C.accent:pend?C.warn:C.muted,
-        cursor:avail?"pointer":"not-allowed",transition:"all 0.15s",fontWeight:"600",
+        cursor:(avail&&!isAllDay)?"pointer":"not-allowed",
+        opacity:isAllDay&&avail?"0.7":"1",
+        transition:"all 0.15s",fontWeight:"600",
         display:"flex",flexDirection:"column",alignItems:"center",gap:"3px"},
-        ()=>{if(avail)toggleSlot(d,h);},
+        ()=>{if(avail&&!isAllDay)toggleSlot(d,h);},
         [div({fontSize:"15px"},`${String(h).padStart(2,"0")}:00`),
          div({fontSize:"10px",opacity:"0.8"},sel?"✓ 選択中":avail?"":pend?"仮予約中":"予約済")]);
       sgrid.appendChild(sb);
@@ -359,11 +401,11 @@ function buildCal(){
     const slist=div({margin:"14px 12px 0",background:C.accentL,borderRadius:"12px",
       padding:"12px 14px",border:`1px solid ${C.accentM}`});
     slist.appendChild(div({fontSize:"12px",fontWeight:"700",color:C.accent,marginBottom:"8px"},
-      `選択中の希望日時（${state.slots.length}/3）`));
+      `選択中の希望日時（${ [...new Set(state.slots.map(s=>s.date))].length}/3日）`));
     state.slots.forEach((s,i)=>{
       const row=div({display:"flex",alignItems:"center",justifyContent:"space-between",
         padding:"5px 0",borderBottom:i<state.slots.length-1?`1px solid rgba(74,127,212,0.2)`:"none"});
-      row.appendChild(div({fontSize:"13px",color:C.accent},`第${"一二三"[i]}希望：${s.label}`));
+      row.appendChild(div({fontSize:"13px",color:C.accent},`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`));
       row.appendChild(btn({background:"none",border:"none",color:C.muted,fontSize:"16px",padding:"0 4px"},
         ()=>setState({slots:state.slots.filter((_,j)=>j!==i)}),"×"));
       slist.appendChild(row);
@@ -381,7 +423,7 @@ function buildForm(){
   // 選択日時サマリ
   const summary=div({background:C.accentL,borderRadius:"12px",padding:"12px 14px",marginBottom:"18px",border:`1px solid ${C.accentM}`});
   summary.appendChild(div({fontSize:"12px",fontWeight:"700",color:C.accent,marginBottom:"6px"},"📅 選択中の希望日時"));
-  state.slots.forEach((s,i)=>summary.appendChild(div({fontSize:"13px",color:C.accent,lineHeight:"1.7"},`第${"一二三"[i]}希望：${s.label}`)));
+  state.slots.forEach((s,i)=>summary.appendChild(div({fontSize:"13px",color:C.accent,lineHeight:"1.7"},`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`)));
   wrap.appendChild(summary);
 
   const card=div({background:C.card,borderRadius:"14px",border:`1px solid ${C.border}`,
@@ -486,7 +528,7 @@ function buildConfirm(){
     ["お名前",`${state.form.name}（${state.form.kana}）`],
     ["ご住所",state.form.address],
     ["電話番号",state.form.phone],
-    ["希望日時",state.slots.map((s,i)=>`第${"一二三"[i]}希望：${s.label}`).join("\n")],
+    ["希望日時",state.slots.map((s,i)=>`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`).join("\n")],
     ["クリーニング",menuLabel+(state.form.note?`\n備考：${state.form.note}`:"")],
   ].forEach(([label,value],i,arr)=>{
     const row=div({display:"flex",gap:"12px",padding:"13px 16px",
@@ -521,7 +563,7 @@ function buildDone(){
   wrap.appendChild(div({fontSize:"20px",fontWeight:"700",color:C.accent,marginBottom:"10px"},"仮予約を受け付けました"));
   const info=div({fontSize:"14px",color:C.mid,lineHeight:"2",marginBottom:"28px"});
   info.appendChild(h("b",{},[`${state.form.name} 様`]));
-  state.slots.forEach((s,i)=>info.appendChild(div({},[`第${"一二三"[i]}希望：${s.label}`])));
+  state.slots.forEach((s,i)=>info.appendChild(div({},[`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`])));
   wrap.appendChild(info);
   wrap.appendChild(div({background:C.accentL,borderRadius:"14px",padding:"16px 18px",
     border:`1px solid ${C.accentM}`,marginBottom:"24px",textAlign:"left"},
