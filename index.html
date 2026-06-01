@@ -856,6 +856,7 @@ function buildAdminModal(){
           ep.forEach((cat,ci)=>{
             cat.items.forEach((item,ii)=>{
               PRICES[ci].items[ii].price=item.price;
+              PRICES[ci].items[ii].note=item.note||"";
               if(item.opts) item.opts.forEach((op,oi)=>{
                 PRICES[ci].items[ii].opts[oi].l=op.l;
                 PRICES[ci].items[ii].opts[oi].p=op.p;
@@ -894,6 +895,7 @@ try{
       if(PRICES[ci]) cat.items.forEach((item,ii)=>{
         if(PRICES[ci].items[ii]){
           PRICES[ci].items[ii].price=item.price;
+          PRICES[ci].items[ii].note=item.note||"";
           if(item.opts) item.opts.forEach((op,oi)=>{
             if(PRICES[ci].items[ii].opts[oi]){
               PRICES[ci].items[ii].opts[oi].l=op.l;
