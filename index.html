@@ -852,17 +852,9 @@ function buildAdminModal(){
       modal.appendChild(btn({width:"100%",padding:"13px",borderRadius:"12px",border:"none",
         background:C.accent,color:"#fff",fontSize:"14px",fontWeight:"700",marginBottom:"10px"},
         ()=>{
-          // PRICESを更新してlocalStorageに保存
-          ep.forEach((cat,ci)=>{
-            cat.items.forEach((item,ii)=>{
-              PRICES[ci].items[ii].price=item.price;
-              PRICES[ci].items[ii].note=item.note||"";
-              if(item.opts) item.opts.forEach((op,oi)=>{
-                PRICES[ci].items[ii].opts[oi].l=op.l;
-                PRICES[ci].items[ii].opts[oi].p=op.p;
-              });
-            });
-          });
+          // PRICESを完全に上書きして即時反映
+          while(PRICES.length) PRICES.pop();
+          ep.forEach(cat=>PRICES.push(JSON.parse(JSON.stringify(cat))));
           try{localStorage.setItem("cocopi_prices",JSON.stringify(PRICES));}catch(e){}
           setState({editPriceMsg:"✅ 保存しました！"});
           setTimeout(()=>setState({editPriceMsg:""}),2000);
