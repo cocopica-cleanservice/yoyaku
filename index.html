@@ -14,10 +14,13 @@ input:focus,textarea:focus{outline:none;border-color:#4a7fd4!important;box-shado
 @keyframes spin{to{transform:rotate(360deg)}}
 .fade{animation:fadeUp 0.25s ease}
 </style>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
 <div id="app"></div>
 <script>
+const LINE_OA_ID="@254dhvrd";
+const LIFF_ID="2010286136-oBUB5BwZ"; // 例：@abc1234x
 const GAS_URL="https://script.google.com/macros/s/AKfycbwm8JZJbOeKRpFte3h6Mkr3P-Q7TAIyVzvNuaXsqySaZ7h8UJTN-36trhrXrrKUSHzHUA/exec";
 const HOURS=[9,10,11,12,13,14,15,16,17];
 const WEEKDAY=["日","月","火","水","木","金","土"];
@@ -88,6 +91,7 @@ async function submitReservation(){
       slots:state.slots.map((s,i)=>`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`),
       cleaning:state.form.menu.map(x=>AC_OPTIONS.includes(x)?`${x}×${state.form.count[x]||1}台`:x),
       cleaningNote:state.form.note,
+        lineUserId:lineUserId,
     })});
   }catch(e){console.warn(e);}
   setState({sending:false,step:"done"});
@@ -587,8 +591,40 @@ function buildDone(){
   wrap.appendChild(div({background:"#fffbf0",borderRadius:"12px",padding:"12px 14px",
     border:"1px solid #f6d03a",fontSize:"12px",color:"#7a5a10",lineHeight:"1.8",marginBottom:"24px",textAlign:"left"},
     "※ お支払いは現金のみです。\n※ 返信にお時間いただく場合があります。"));
-  wrap.appendChild(btn({padding:"13px 36px",borderRadius:"14px",border:"none",background:C.accent,
-    color:"#fff",fontSize:"15px",fontWeight:"700",boxShadow:"0 4px 16px rgba(26,79,160,0.3)"},reset,"カレンダーに戻る"));
+  // LINEで仮予約完了ボタン
+  const lineMsg="仮予約が完了しました。\n"+state.form.name+"様\n"
+    +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n");
+  const lineUrl="https://line.me/R/oaMessage/"+LINE_OA_ID+"/?"+encodeURIComponent(lineMsg);
+
+  // LIFFで自動送信（liff.sendMessages）
+  const completionMsg = {type:"text",text:lineMsg};
+  const actionBox=div({background:C.accentL,borderRadius:"14px",padding:"18px 16px",
+    border:`1px solid ${C.accentM}`,marginBottom:"16px",textAlign:"center"});
+  actionBox.appendChild(div({fontSize:"13px",fontWeight:"700",color:C.accent,marginBottom:"8px"},
+    "📱 仮予約の完了通知"));
+  actionBox.appendChild(div({fontSize:"12px",color:"#555",marginBottom:"14px",lineHeight:"1.8"},
+    "下のボタンを押すとLINEに完了通知が\n自動で送信されます。"));
+  const completeBtn=btn({display:"block",width:"100%",background:"#06c755",border:"none",
+    borderRadius:"12px",padding:"15px",color:"#fff",fontSize:"16px",fontWeight:"700",
+    boxShadow:"0 4px 16px rgba(6,199,85,0.4)",marginBottom:"8px"},
+    async ()=>{
+      try{
+        if(liff.isInClient()){
+          await liff.sendMessages([completionMsg]);
+          completeBtn.textContent="✅ 送信しました！";
+          completeBtn.style.background="#999";
+        } else {
+          window.open(lineUrl,"_blank");
+        }
+      }catch(e){
+        window.open(lineUrl,"_blank");
+      }
+    },"📲 仮予約を完了する");
+  actionBox.appendChild(completeBtn);
+  wrap.appendChild(actionBox);
+
+  wrap.appendChild(btn({padding:"12px 32px",borderRadius:"14px",border:`1.5px solid ${C.border}`,
+    background:C.card,color:C.muted,fontSize:"13px"},reset,"カレンダーに戻る"));
   return wrap;
 }
 
@@ -876,6 +912,25 @@ function buildLockBtn(){
     ()=>setState({showAdmin:true}),"🔒");
   return b;
 }
+
+// ── 起動 ─────────────────────────────────────
+// LIFF初期化
+let lineUserId = null;
+async function initLiff(){
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if(liff.isLoggedIn()){
+      const profile = await liff.getProfile();
+      lineUserId = profile.userId;
+      console.log("LIFF UserID:", lineUserId);
+    } else {
+      liff.login();
+    }
+  } catch(e) {
+    console.warn("LIFF init error:", e);
+  }
+}
+initLiff();
 
 // ── 起動 ─────────────────────────────────────
 // 保存済み料金を復元
