@@ -26,15 +26,31 @@ const HOURS=[9,10,11,12,13,14,15,16,17];
 const WEEKDAY=["日","月","火","水","木","金","土"];
 const AC_OPTIONS=["エアコン（壁掛け型）","エアコン（お掃除機能付き）","エアコン（天井カセット型）"];
 const MENU=["エアコン（壁掛け型）","エアコン（お掃除機能付き）","エアコン（天井カセット型）","縦型洗濯機","ドラム式洗濯機","浴室・バスルーム","キッチン","レンジフード","トイレ","洗面台","窓ガラス・サッシ","その他（備考に記載）"];
+const FAQ_DEFAULT=[
+  {q:"追加料金がかかる場合がありますか？",a:"当日の急な追加料金は発生しません。必ず、お客様に状況を事前にお知らせします。"},
+  {q:"無料で駐車できる場所がない場合はどうしたらいいですか？",a:"付近の有料パーキングを使用しますが、その場合のパーキング代のご負担をお願いします。"},
+  {q:"どれくらいの頻度でクリーニングすればいいですか？",a:"使用頻度や汚れ具合にもよりますが、リビングであれば1、2年に1回、寝室や子供部屋であれば2回に1回が目安になります。"},
+  {q:"ペットは大丈夫ですか？",a:"ペットは全然大丈夫ですが、作業場周りには小さなパーツや薬品などが置いてあり舐めると危険ですので、近づかないようにお願いしております。当社に故意又は重過失がある場合を除き、一切責任は負いかねます。"},
+  {q:"清掃後の不具合があった場合、料金はかかりますか？",a:"2週間以内であれば無料で対応させていただきます。"},
+  {q:"エアコン下にモノがあるが大丈夫？",a:"エアコン下に脚立を立てるスペースがあれば大丈夫です。動かせないモノやベッドがある場合は養生して作業させていただきます。"},
+];
+
+const CANCEL_POLICY=[
+  {period:"作業日の前日",rate:"50%"},
+  {period:"作業日当日",rate:"100%"},
+];
+const CANCEL_NOTE="※ 日程変更（日延べ）はキャンセルとなりません。\nお気軽にご相談ください。";
+
 const PRICES=[
-  {cat:"エアコン",items:[
-    {name:"エアコン（壁掛け型）",price:"¥8,000〜",opts:[{l:"防カビコート",p:"+¥1,000"},{l:"室外機",p:"+¥3,000"}]},
-    {name:"エアコン（お掃除機能付き）",price:"¥14,000〜",opts:[{l:"防カビコート",p:"+¥1,000"},{l:"室外機",p:"+¥3,000"}]},
+  {cat:"エアコン",detail:"☆★こんなお悩みはありませんか？★☆\n・送風口、ファンのカビが気になる\n・強風にしても風量が弱い、出てない\n・エアコンを使うと咳が出るようになった\n・カビの匂いが気になる\n・水漏れがする\nクリーニングで解決します！\n\n■■■■作業の流れ■■■■\n①エアコンの動作を確認\n②エアコン周りの養生\n③各部品の分解\n④エアコン本体と電装部養生\n⑤パーツの洗浄（お風呂場または屋外水栓をお借りします）\n⑥アルミフィンとファンに洗剤噴霧\n⑦エアコン内部を高圧洗浄で洗い流し、排水の確認\n⑧各部品の組み立て\n⑨エアコンの動作を最終確認\n\n高圧洗浄機も比較的静かなものを使用し、騒音にも配慮しておりますのでご安心ください！\nパーツ洗浄でお借りしたスペースはしっかり原状回復しますのでご安心ください！",items:[
+    {name:"エアコン（壁掛け型）",price:"¥8,000〜",detail:"◆作業内容\n外装カバーの清掃 / フィルターの洗浄 / 本体内部の高圧洗浄 / ドレンパンの洗浄 / 作業場所の簡易清掃\n\n◆作業時間の目安\n約60分/台\n※汚れ具合やエアコンの設置状況により前後します。",opts:[{l:"防カビコート",p:"+¥1,000"},{l:"室外機",p:"+¥3,000"}]},
+    {name:"エアコン（お掃除機能付き）",price:"¥14,000〜",detail:"◆作業内容\n外装カバーの清掃 / フィルターの洗浄 / 本体内部の高圧洗浄 / ドレンパンの洗浄 / 作業場所の簡易清掃\n\n◆作業時間の目安\n約100分/台\n※汚れ具合やエアコンの設置状況により前後します。\n\n〈お掃除機能付きエアコンの注意事項〉\nエアコンと左右上下の隙間が狭い場合、ロボを取り外せない場合があります。状況によっては作業困難によりお断りする場合がございますので、予めご了承ください。壁との間に拳が入るか試してみて下さい。",opts:[{l:"防カビコート",p:"+¥1,000"},{l:"室外機",p:"+¥3,000"}]},
     {name:"エアコン（天井カセット型）",price:"お問い合わせ",opts:[]},
   ]},
   {cat:"洗濯機",items:[
-    {name:"縦型洗濯機",price:"¥14,000〜",opts:[{l:"乾燥付き",p:"+¥3,000"},{l:"日立BW（乾燥無し）",p:"+¥2,000"},{l:"日立BW（乾燥付き）",p:"+¥4,000"},{l:"日立BW DXシリーズ",p:"+¥10,000"}]},
-    {name:"ドラム式洗濯機",price:"¥25,000〜",caution:"⚠️ 対象外：AQUA・IRIS OYAMA・2010年製以前",opts:[{l:"東芝・シャープ製",p:"+¥2,000"}]},
+    {name:"縦型洗濯機",price:"¥14,000〜",detail:"◆作業内容\n洗濯槽の取り外し洗浄（分解洗浄）/ 洗濯機本体の内側・外側 / 洗濯パン / 作業場所の簡易清掃\n\n◆作業時間の目安\n・乾燥機無し 約150分/台\n・乾燥機付き 約180分/台\n・DX、12kg 約240分/台\n※汚れ具合や洗濯機の機種により前後します。\n\n汚れによる追加料金はございませんので、ご安心ください！\n\n〈作業についての注意事項〉\n・ボルトの錆や劣化、汚れの固着によって洗濯槽やパルセーターが外れない場合がございます。その際はキャンセルではなく、高圧洗浄機での対応になりますので、予めご了承下さい。\n・10kg以上は重量があり動かせない場合、洗濯パンの掃除が困難なことがありますので、予めご了承下さい。\n・ワセリンや軟骨を多く使われている場合、完全に落としきることが難しいので、予めご了承下さい。",opts:[{l:"乾燥付き",p:"+¥3,000"},{l:"日立BW（乾燥無し）",p:"+¥2,000"},{l:"日立BW（乾燥付き）",p:"+¥5,000"},{l:"日立BW DXシリーズ",p:"+¥10,000"}]},
+    {name:"ドラム式洗濯機",price:"¥25,000〜",caution:"⚠️ 対象外：AQUA・IRIS OYAMA・2010年製以前",opts:[{l:"東芝・シャープ製",p:"+¥2,000"}],detail:"◆作業内容\n洗濯槽の分解洗浄（取り外しなし）/ 洗濯機本体の内側・外側 / 作業場所の簡易清掃\n\n〈作業についての注意事項〉\n・ドラム式洗濯機はかなりの重量があるため、基本動かさず、そのまま作業します。洗濯パンや排水溝が隠れてしまっている場合、お手入れすることが難しいですので、予めご了承下さい。\n・東芝製はコーキングの打ち直しが必要な為、作業後半日以上乾燥させる必要がございますので、予めご了承ください。\n・ワセリンや軟骨を多く使われている場合、完全に落としきることが難しいので、予めご了承下さい。"},
+
   ]},
   {cat:"水回り",items:[
     {name:"浴室・バスルーム",price:"¥14,000",note:"鏡/浴槽/天井/照明/窓/蛇口/シャワー/壁面/床/扉/排水口",opts:[]},
@@ -62,7 +78,7 @@ let state={
   selDate:null, slots:[], // [{date,hour,label}]
   form:{name:"",kana:"",address:"",phone:"",menu:[],count:{},note:""},
   errors:{}, sending:false,
-  showPrice:false, showAdmin:false,
+  showPrice:false, priceTab:'price', showAdmin:false,
   adminUnlocked:false, adminPass:"",
   blockDate:"", blockHours:[], blockMemo:"", blockMsg:"",
   adminTab:"block", // block | price
@@ -229,12 +245,20 @@ function buildApp(){
   if(state.step==="cal") wrap.appendChild(buildLockBtn());
   if(state.step==="cal"){
     const fab=div({position:"fixed",bottom:"0",left:"0",right:"0",zIndex:"10",
-      display:"flex",justifyContent:"center",padding:"12px 16px 28px",
+      padding:"10px 12px 24px",
       background:"linear-gradient(transparent,rgba(240,244,255,0.97) 40%)"});
-    fab.appendChild(btn({background:C.accent,border:"none",color:"#fff",borderRadius:"14px",
-      padding:"14px 48px",fontSize:"15px",fontWeight:"700",
-      boxShadow:"0 4px 20px rgba(26,79,160,0.35)",letterSpacing:"0.05em"},
-      ()=>setState({showPrice:true}),"💰 料金表を見る"));
+    const btnRow=div({display:"flex",gap:"8px",justifyContent:"center"});
+    [
+      {label:"💰 料金表",key:"price"},
+      {label:"❓ よくある質問",key:"faq"},
+      {label:"📋 キャンセル",key:"cancel"},
+    ].forEach(({label,key})=>{
+      btnRow.appendChild(btn({flex:"1",maxWidth:"120px",background:C.accent,border:"none",color:"#fff",
+        borderRadius:"12px",padding:"12px 6px",fontSize:"12px",fontWeight:"700",
+        boxShadow:"0 4px 16px rgba(26,79,160,0.3)"},
+        ()=>setState({showPrice:true,priceTab:key}),label));
+    });
+    fab.appendChild(btnRow);
     wrap.appendChild(fab);
   }
   return wrap;
@@ -683,16 +707,89 @@ function buildPriceModal(){
   const modal=div({background:"#f0f4ff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:"480px",maxHeight:"92vh",overflowY:"auto"});
   modal.addEventListener("click",e=>e.stopPropagation());
   const mhead=div({position:"sticky",top:"0",background:C.accent,color:"#fff",
-    padding:"16px 20px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",
-    borderRadius:"20px 20px 0 0"});
-  mhead.appendChild(div({fontSize:"16px",fontWeight:"700"},"料金表"));
-  mhead.appendChild(btn({background:"rgba(255,255,255,0.2)",border:"none",color:"#fff",
+    padding:"12px 16px 0",borderRadius:"20px 20px 0 0",zIndex:"1"});
+  const headTop=div({display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"});
+  const titles={"price":"💰 料金表","faq":"❓ よくある質問","cancel":"📋 キャンセルポリシー"};
+  headTop.appendChild(div({fontSize:"16px",fontWeight:"700"},titles[state.priceTab]||"料金表"));
+  headTop.appendChild(btn({background:"rgba(255,255,255,0.2)",border:"none",color:"#fff",
     borderRadius:"6px",padding:"4px 10px",fontSize:"12px"},()=>setState({showPrice:false}),"閉じる"));
+  mhead.appendChild(headTop);
+  // タブ
+  const tabRow=div({display:"flex",gap:"0",borderTop:"1px solid rgba(255,255,255,0.2)"});
+  [["price","料金表"],["faq","よくある質問"],["cancel","キャンセル"]].forEach(([key,label])=>{
+    const t=btn({flex:"1",padding:"8px 4px",border:"none",fontSize:"11px",fontWeight:"700",
+      background:state.priceTab===key?"rgba(255,255,255,0.2)":"transparent",
+      color:"#fff",borderBottom:state.priceTab===key?"2px solid #fff":"2px solid transparent"},
+      ()=>setState({showPrice:true,priceTab:key}),label);
+    tabRow.appendChild(t);
+  });
+  mhead.appendChild(tabRow);
   modal.appendChild(mhead);
   const body=div({padding:"16px 16px 40px"});
+
+  // FAQタブ
+  if(state.priceTab==="faq"){
+    const faqData2=JSON.parse(localStorage.getItem("cocopi_faq")||"null")||FAQ_DEFAULT;
+    faqData2.forEach((item)=>{
+      const wrap=div({background:C.card,borderRadius:"12px",marginBottom:"8px",overflow:"hidden",boxShadow:"0 1px 6px rgba(0,0,0,0.06)"});
+      const qRow=div({display:"flex",alignItems:"flex-start",gap:"10px",padding:"14px 16px",cursor:"pointer"});
+      const qBadge=div({background:C.accent,color:"#fff",borderRadius:"50%",width:"24px",height:"24px",minWidth:"24px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700"});
+      qBadge.textContent="Q";
+      const qText=div({fontSize:"14px",fontWeight:"600",color:C.text,flex:"1",lineHeight:"1.6"});
+      qText.textContent=item.q;
+      const arrow=div({fontSize:"12px",color:C.muted});arrow.textContent="▼";
+      qRow.appendChild(qBadge);qRow.appendChild(qText);qRow.appendChild(arrow);
+      const aRow=div({display:"none",padding:"0 16px 14px 16px"});
+      const aInner=div({display:"flex",alignItems:"flex-start",gap:"10px"});
+      const aBadge=div({background:"#888",color:"#fff",borderRadius:"50%",width:"24px",height:"24px",minWidth:"24px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700"});
+      aBadge.textContent="A";
+      const aText=div({fontSize:"13px",color:C.mid,lineHeight:"1.8",flex:"1"});
+      aText.textContent=item.a;
+      aInner.appendChild(aBadge);aInner.appendChild(aText);aRow.appendChild(aInner);
+      qRow.addEventListener("click",()=>{const open=aRow.style.display!=="none";aRow.style.display=open?"none":"block";arrow.textContent=open?"▼":"▲";});
+      wrap.appendChild(qRow);wrap.appendChild(aRow);body.appendChild(wrap);
+    });
+    modal.appendChild(body);overlay.appendChild(modal);return overlay;
+  }
+
+  // キャンセルタブ
+  if(state.priceTab==="cancel"){
+    const cancelBox=div({background:C.card,borderRadius:"12px",overflow:"hidden",boxShadow:"0 1px 6px rgba(0,0,0,0.06)",marginBottom:"16px"});
+    CANCEL_POLICY.forEach((item,i)=>{
+      const row=div({display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",borderBottom:i<CANCEL_POLICY.length-1?`1px solid ${C.border}`:"none",background:i===CANCEL_POLICY.length-1?"#fff0f0":"transparent"});
+      const p=div({fontSize:"14px",color:C.text});p.textContent=item.period;
+      const r=div({fontSize:"14px",fontWeight:"700",color:i===CANCEL_POLICY.length-1?"#c0392b":C.text});r.textContent="予約金額の"+item.rate;
+      row.appendChild(p);row.appendChild(r);cancelBox.appendChild(row);
+    });
+    body.appendChild(cancelBox);
+    const noteBox=div({background:"#e8eeff",borderRadius:"10px",padding:"12px 14px",
+      fontSize:"12px",color:C.accent,lineHeight:"1.8",marginTop:"8px"});
+    noteBox.textContent=CANCEL_NOTE;
+    body.appendChild(noteBox);
+    modal.appendChild(body);overlay.appendChild(modal);return overlay;
+  }
+
+  // 料金表タブ
   PRICES.forEach(cat=>{
-    body.appendChild(div({fontSize:"13px",fontWeight:"700",color:"#fff",background:C.accent,
-      padding:"6px 14px",borderRadius:"8px",marginBottom:"8px"},[cat.cat]));
+    const catHeader=div({marginBottom:"8px"});
+    const catDetail=div({display:"none",background:"#f8f9ff",borderRadius:"8px",
+      padding:"14px",marginTop:"4px",fontSize:"12px",color:C.mid,lineHeight:"1.9",whiteSpace:"pre-wrap",marginBottom:"4px"});
+    if(cat.detail) catDetail.textContent=cat.detail;
+    const catTitleBtn=document.createElement("button");
+    catTitleBtn.style.cssText="width:100%;display:flex;align-items:center;justify-content:space-between;background:"+C.accent+";border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:"+(cat.detail?"pointer":"default")+";font-family:inherit;font-size:13px;font-weight:700;text-align:left;";
+    const catLabel=document.createElement("span");
+    catLabel.textContent=cat.detail?"▼ "+cat.cat:cat.cat;
+    catTitleBtn.appendChild(catLabel);
+    if(cat.detail){
+      catTitleBtn.addEventListener("click",()=>{
+        const open=catDetail.style.display!=="none";
+        catDetail.style.display=open?"none":"block";
+        catLabel.textContent=open?"▼ "+cat.cat:"▲ "+cat.cat;
+      });
+    }
+    catHeader.appendChild(catTitleBtn);
+    catHeader.appendChild(catDetail);
+    body.appendChild(catHeader);
     cat.items.forEach(item=>{
       const card=div({background:C.card,borderRadius:"12px",padding:"14px 16px",
         marginBottom:"8px",boxShadow:"0 1px 6px rgba(0,0,0,0.06)"});
@@ -702,6 +799,16 @@ function buildPriceModal(){
       card.appendChild(top);
       if(item.note) card.appendChild(div({fontSize:"11px",color:"#777",lineHeight:"1.7",marginBottom:"6px",whiteSpace:"pre-wrap"},item.note));
       if(item.caution) card.appendChild(div({fontSize:"11px",color:C.danger,background:"#fff0f0",padding:"6px 8px",borderRadius:"6px",marginBottom:"6px"},item.caution));
+      if(item.detail){
+        const detailBtn=document.createElement("button");
+        detailBtn.style.cssText="width:100%;background:none;border:none;color:"+C.accent+";font-size:11px;font-family:inherit;cursor:pointer;text-align:left;padding:4px 0;";
+        detailBtn.textContent="▼ 詳細を見る";
+        const detailBox=div({display:"none",background:"#f8f9ff",borderRadius:"8px",padding:"12px",marginTop:"4px",fontSize:"11px",color:C.mid,lineHeight:"1.9",whiteSpace:"pre-wrap"});
+        detailBox.textContent=item.detail;
+        detailBtn.addEventListener("click",()=>{const open=detailBox.style.display!=="none";detailBox.style.display=open?"none":"block";detailBtn.textContent=open?"▼ 詳細を見る":"▲ 閉じる";});
+        card.appendChild(detailBtn);
+        card.appendChild(detailBox);
+      }
       if(item.opts&&item.opts.length){
         const optbox=div({marginTop:"6px",paddingTop:"6px",borderTop:"1px solid #f0f0f0"});
         optbox.appendChild(div({fontSize:"10px",color:"#999",marginBottom:"4px",fontWeight:"700",letterSpacing:"0.05em"},"オプション"));
@@ -721,6 +828,7 @@ function buildPriceModal(){
   body.appendChild(div({padding:"12px 16px",background:"#fff8e8",borderRadius:"10px",
     border:"1px solid #f6d03a",fontSize:"12px",color:"#7a5a10",lineHeight:"1.8"},
     "※ お支払いは現金のみになります。\n※ 料金は税込み表示です。"));
+
   modal.appendChild(body);
   overlay.appendChild(modal);
   return overlay;
@@ -827,11 +935,19 @@ function buildAdminModal(){
       ep.forEach((cat,ci)=>{
         // カテゴリヘッダー（名前編集＋並び替え＋削除）
         const catRow=div({display:"flex",alignItems:"center",gap:"6px",marginBottom:"8px"});
-        const catInp=h("input",{type:"text",style:{flex:"1",padding:"7px 12px",borderRadius:"8px",
+        const catCol=div({display:"flex",flexDirection:"column",flex:"1",gap:"4px"});
+        const catInp=h("input",{type:"text",style:{width:"100%",padding:"7px 12px",borderRadius:"8px",
           border:"none",background:C.accent,color:"#fff",fontSize:"13px",fontWeight:"700"}});
         catInp.value=cat.cat;
         catInp.addEventListener("input",e=>{ep[ci].cat=e.target.value;});
-        catRow.appendChild(catInp);
+        const catDetailTa=h("textarea",{style:{width:"100%",padding:"7px 10px",borderRadius:"8px",
+          border:`1px solid ${C.border}`,fontSize:"11px",resize:"none",lineHeight:"1.6"},rows:"3",
+          placeholder:"カテゴリの詳細説明（タップで開く内容）"});
+        catDetailTa.value=ep[ci].detail||"";
+        catDetailTa.addEventListener("input",e=>{ep[ci].detail=e.target.value;});
+        catCol.appendChild(catInp);
+        catCol.appendChild(catDetailTa);
+        catRow.appendChild(catCol);
         // 上へ
         if(ci>0) catRow.appendChild(btn({padding:"6px 8px",borderRadius:"6px",
           border:`1px solid ${C.border}`,background:"#f0f4ff",color:C.accent,fontSize:"13px"},
@@ -874,6 +990,16 @@ function buildAdminModal(){
           nta.addEventListener("input",e=>{ep[ci].items[ii].note=e.target.value;});
           nrow.appendChild(nta);
           card.appendChild(nrow);
+          // 詳細説明入力
+          const drow=div({display:"flex",alignItems:"flex-start",gap:"8px",marginBottom:"6px"});
+          drow.appendChild(div({fontSize:"11px",color:C.muted,width:"32px",paddingTop:"8px"},"詳細"));
+          const dta=h("textarea",{style:{flex:"1",padding:"8px 10px",borderRadius:"8px",
+            border:`1.5px solid ${C.border}`,fontSize:"12px",resize:"none",lineHeight:"1.6"},rows:"4",
+            placeholder:"詳細説明（任意）"});
+          dta.value=item.detail||"";
+          dta.addEventListener("input",e=>{ep[ci].items[ii].detail=e.target.value;});
+          drow.appendChild(dta);
+          card.appendChild(drow);
           // オプション編集
           const optLabel=div({fontSize:"11px",color:C.muted,fontWeight:"700",marginBottom:"4px"},"オプション");
           card.appendChild(optLabel);
