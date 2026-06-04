@@ -635,9 +635,13 @@ function buildDone(){
 
   // 1タップで公式LINEに送信するボタン
   const lineMsg2="【仮予約が完了しました】\n"
-    +state.form.name+"様\n"
-    +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n"
-    +"内容："+state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、");
+    +state.form.name+"様\n\n"
+    +"ご希望日時：\n"
+    +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n\n"
+    +"クリーニング内容：\n"
+    +state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、")+"\n\n"
+    +"スタッフよりLINEにて本予約の確定をご連絡します。\nしばらくお待ちください。\n\n"
+    +"※ お支払いは現金のみとなります。";
 
   const actionBox=div({background:"#fff0f0",borderRadius:"14px",padding:"18px 16px",
     border:"2px solid #e74c3c",marginBottom:"16px",textAlign:"center"});
