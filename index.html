@@ -100,7 +100,16 @@ async function submitReservation(){
         +state.form.name+"様\n"
         +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n"
         +"内容："+state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、");
-      await liff.sendMessages([{type:"text",text:msg}]);
+      try{
+        await liff.sendMessages([{type:"text",text:msg}]);
+        console.log("sendMessages成功");
+      }catch(err){
+        console.warn("sendMessages失敗:",err);
+        alert("送信エラー："+err.message);
+      }
+    } else {
+      alert("LIFFクライアント外です。LIFFのURLから開いてください。
+isInClient:"+liff.isInClient());
     }
   }catch(e){console.warn(e);}
   setState({sending:false,step:"done"});
@@ -936,13 +945,15 @@ let lineUserId = null;
 async function initLiff(){
   try {
     await liff.init({ liffId: LIFF_ID });
-    if(liff.isLoggedIn()){
-      const profile = await liff.getProfile();
-      lineUserId = profile.userId;
-      console.log("LIFF UserID:", lineUserId);
-    } else {
+    if(!liff.isLoggedIn()){
       liff.login();
+      return;
     }
+    const profile = await liff.getProfile();
+    lineUserId = profile.userId;
+    console.log("LIFF UserID:", lineUserId);
+    console.log("isInClient:", liff.isInClient());
+    console.log("context:", liff.getContext());
   } catch(e) {
     console.warn("LIFF init error:", e);
   }
