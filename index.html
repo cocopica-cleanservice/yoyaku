@@ -102,14 +102,9 @@ async function submitReservation(){
         +"内容："+state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、");
       try{
         await liff.sendMessages([{type:"text",text:msg}]);
-        console.log("sendMessages成功");
       }catch(err){
         console.warn("sendMessages失敗:",err);
-        alert("送信エラー："+err.message);
       }
-    } else {
-      alert("LIFFクライアント外です。LIFFのURLから開いてください。
-isInClient:"+liff.isInClient());
     }
   }catch(e){console.warn(e);}
   setState({sending:false,step:"done"});
