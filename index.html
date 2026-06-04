@@ -164,7 +164,7 @@ function validate(){
   return !Object.keys(e).length;
 }
 
-function reset(){setState({step:"cal",selDate:null,slots:[],form:{name:"",kana:"",address:"",phone:"",menu:[],count:{},note:""},errors:{}});}
+function reset(){setState({step:"cal",selDate:null,slots:[],form:{name:"",kana:"",address:"",phone:"",zip:"",menu:[],count:{},note:""},errors:{}});}
 
 // ── HTML生成ヘルパー ──────────────────────────
 function h(tag,attrs,children){
@@ -467,9 +467,42 @@ function buildForm(){
   const af=div({marginBottom:"14px"});
   af.appendChild(h("label",{style:{display:"block",fontSize:"13px",fontWeight:"700",color:C.mid,marginBottom:"6px"}},
     ["② ご住所",h("span",{style:{color:C.danger,marginLeft:"3px"}},"*")]));
-  af.appendChild(ta({width:"100%",padding:"11px 12px",borderRadius:"10px",
-    border:`1.5px solid ${state.errors.address?C.danger:C.border}`,fontSize:"14px",resize:"none",lineHeight:"1.7"},
-    state.form.address,v=>{state.form.address=v;},2,"〒000-0000\n○○県○○市○○1-2-3"));
+  // 郵便番号入力行
+  const zipRow=div({display:"flex",gap:"8px",marginBottom:"8px",alignItems:"center"});
+  const zipInp=h("input",{type:"tel",placeholder:"郵便番号（ハイフンなし）",
+    style:{flex:"1",padding:"11px 12px",borderRadius:"10px",border:`1.5px solid ${C.border}`,fontSize:"14px"}});
+  zipInp.value=state.form.zip||"";
+  zipInp.addEventListener("change",e=>{state.form.zip=e.target.value;});
+  const addrTa=h("textarea",{rows:"2",placeholder:"自動入力後に番地・部屋番号を追記してください",
+    style:{width:"100%",padding:"11px 12px",borderRadius:"10px",
+      border:`1.5px solid ${state.errors.address?C.danger:C.border}`,fontSize:"14px",resize:"none",lineHeight:"1.7"}});
+  addrTa.value=state.form.address||"";
+  addrTa.addEventListener("change",e=>{state.form.address=e.target.value;});
+  const zipBtn=btn({padding:"10px 14px",borderRadius:"10px",border:"none",
+    background:C.accent,color:"#fff",fontSize:"13px",fontWeight:"700",whiteSpace:"nowrap"},
+    async ()=>{
+      const zip=(zipInp.value).replace(/[^0-9]/g,"");
+      if(zip.length!==7){alert("郵便番号は7桁で入力してください");return;}
+      const orig=zipBtn.textContent;
+      zipBtn.textContent="検索中...";
+      try{
+        const res=await fetch("https://zipcloud.ibsnet.co.jp/api/search?zipcode="+zip);
+        const json=await res.json();
+        if(json.results&&json.results[0]){
+          const r=json.results[0];
+          const addr=r.address1+r.address2+r.address3;
+          state.form.address=addr;
+          addrTa.value=addr;
+          addrTa.focus();
+        }else{alert("住所が見つかりませんでした");}
+      }catch(e){alert("検索に失敗しました");}
+      zipBtn.textContent=orig;
+    },"住所検索");
+  zipRow.appendChild(zipInp);
+  zipRow.appendChild(zipBtn);
+  af.appendChild(zipRow);
+  af.appendChild(addrTa);
+  af.appendChild(div({fontSize:"11px",color:C.muted,marginTop:"4px"},"※ 番地・部屋番号は手動で追記してください"));
   if(state.errors.address) af.appendChild(div({fontSize:"11px",color:C.danger,marginTop:"4px"},state.errors.address));
   card.appendChild(af);
   card.appendChild(div({height:"1px",background:C.border,margin:"4px 0 14px"},""));
