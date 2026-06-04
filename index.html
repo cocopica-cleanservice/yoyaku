@@ -94,18 +94,7 @@ async function submitReservation(){
         lineUserId:lineUserId,
     })});
 
-    // liff.sendMessagesでお客様→公式LINEに自動送信
-    if(typeof liff!=="undefined"&&liff.isInClient()){
-      const msg="【仮予約が完了しました】\n"
-        +state.form.name+"様\n"
-        +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n"
-        +"内容："+state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、");
-      try{
-        await liff.sendMessages([{type:"text",text:msg}]);
-      }catch(err){
-        console.warn("sendMessages失敗:",err);
-      }
-    }
+
   }catch(e){console.warn(e);}
   setState({sending:false,step:"done"});
 }
@@ -643,6 +632,40 @@ function buildDone(){
   const lineUrl="https://line.me/R/oaMessage/"+LINE_OA_ID+"/?"+encodeURIComponent(lineMsg);
 
 
+
+  // 1タップで公式LINEに送信するボタン
+  const lineMsg2="【仮予約が完了しました】\n"
+    +state.form.name+"様\n"
+    +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n"
+    +"内容："+state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、");
+
+  const actionBox=div({background:"#fff0f0",borderRadius:"14px",padding:"18px 16px",
+    border:"2px solid #e74c3c",marginBottom:"16px",textAlign:"center"});
+  actionBox.appendChild(div({fontSize:"13px",fontWeight:"700",color:"#c0392b",marginBottom:"6px"},
+    "⚠️ 必ず下のボタンを押してください"));
+  actionBox.appendChild(div({fontSize:"12px",color:"#555",marginBottom:"14px",lineHeight:"1.8"},
+    "ボタンを押すと仮予約が確定されます。"));
+  const sendBtn=btn({width:"100%",background:"#06c755",border:"none",
+    borderRadius:"12px",padding:"15px",color:"#fff",fontSize:"16px",fontWeight:"700",
+    boxShadow:"0 4px 16px rgba(6,199,85,0.4)",marginBottom:"8px"},
+    async ()=>{
+      try{
+        if(typeof liff!=="undefined"&&liff.isInClient()){
+          await liff.sendMessages([{type:"text",text:lineMsg2}]);
+          sendBtn.textContent="✅ 送信しました！";
+          sendBtn.style.background="#999";
+          sendBtn.disabled=true;
+        } else {
+          window.open("https://line.me/R/oaMessage/"+LINE_OA_ID+"/?"+encodeURIComponent(lineMsg2),"_blank");
+        }
+      }catch(e){
+        window.open("https://line.me/R/oaMessage/"+LINE_OA_ID+"/?"+encodeURIComponent(lineMsg2),"_blank");
+      }
+    },"📲 仮予約を確定する");
+  actionBox.appendChild(sendBtn);
+  actionBox.appendChild(div({fontSize:"11px",color:"#e74c3c",fontWeight:"700"},
+    "↑ このボタンを必ず押してください！"));
+  wrap.appendChild(actionBox);
 
   wrap.appendChild(btn({padding:"12px 32px",borderRadius:"14px",border:`1.5px solid ${C.border}`,
     background:C.card,color:C.muted,fontSize:"13px"},reset,"カレンダーに戻る"));
