@@ -663,7 +663,7 @@ function buildConfirm(){
     ["ご住所",state.form.address],
     ["電話番号",state.form.phone],
     ["希望日時",state.slots.map((s,i)=>`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`).join("\n")],
-    ["クリーニング",menuLabel+(Object.keys(state.form.opts||{}).length?`\nオプション：${Object.values(state.form.opts).map(op=>op.l+"（"+op.p+"）").join("、")}`:"")+(state.form.note?`\n備考：${state.form.note}`:"")],
+    ["クリーニング",menuLabel+(Object.keys(state.form.opts||{}).length?`\nオプション：${Object.keys(state.form.opts).map(k=>{const op=state.form.opts[k];const itemName=k.split("__")[0];return itemName+"→"+op.l+"（"+op.p+"）";}).join("、")}`:"")+(state.form.note?`\n備考：${state.form.note}`:"")],
   ].forEach(([label,value],i,arr)=>{
     const row=div({display:"flex",gap:"12px",padding:"13px 16px",
       borderBottom:i<arr.length-1?`1px solid ${C.border}`:"none"});
@@ -742,7 +742,7 @@ function buildDone(){
     +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n\n"
     +"クリーニング内容：\n"
     +state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、")+"\n"
-    +(Object.keys(state.form.opts||{}).length?"オプション："+Object.values(state.form.opts).map(op=>op.l+"（"+op.p+"）").join("、")+"\n":"")
+    +(Object.keys(state.form.opts||{}).length?"オプション："+Object.keys(state.form.opts).map(k=>{const op=state.form.opts[k];const itemName=k.split("__")[0];return itemName+"→"+op.l+"（"+op.p+"）";}).join("、")+"\n":"")
     +"\n料金の目安："+totalStr+"\n\n"
     +"スタッフよりLINEにて本予約の確定をご連絡します。\nしばらくお待ちください。\n\n"
     +"※ お支払いは現金のみとなります。";
