@@ -138,6 +138,8 @@ async function submitReservation(){
       slots:state.slots.map((s,i)=>`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`),
       cleaning:state.form.menu.map(x=>AC_OPTIONS.includes(x)?`${x}×${state.form.count[x]||1}台`:x),
       cleaningNote:state.form.note,
+        options:Object.keys(state.form.opts||{}).map(k=>{const op=state.form.opts[k];return k.split("__")[0]+"→"+op.l+"（"+op.p+"）";}).join("、"),
+        total:(()=>{const c=calcTotal();return c.hasUnknown?"¥"+c.total.toLocaleString()+"〜 ＋要相談":"¥"+c.total.toLocaleString()+"〜";})(),
         lineUserId:lineUserId,
     })});
 
