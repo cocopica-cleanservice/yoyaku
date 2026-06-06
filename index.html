@@ -760,7 +760,15 @@ function buildDone(){
           sendBtn.style.background="#999";
           sendBtn.disabled=true;
         } else {
-          window.open("https://line.me/R/oaMessage/"+LINE_OA_ID+"/?"+encodeURIComponent(lineMsg2),"_blank");
+          // isInClientがfalseの場合はsendMessagesを強制試行
+          try{
+            await liff.sendMessages([{type:"text",text:lineMsg2}]);
+            sendBtn.textContent="✅ 送信しました！";
+            sendBtn.style.background="#999";
+            sendBtn.disabled=true;
+          }catch(e2){
+            window.open("https://line.me/R/oaMessage/"+LINE_OA_ID+"/?"+encodeURIComponent(lineMsg2),"_blank");
+          }
         }
       }catch(e){
         window.open("https://line.me/R/oaMessage/"+LINE_OA_ID+"/?"+encodeURIComponent(lineMsg2),"_blank");
