@@ -966,23 +966,43 @@ function buildAdminModal(){
     di.addEventListener("change",e=>{
       const d=e.target.value;
       if(!d) return;
-      if(!state.blockDate.split(",").filter(Boolean).includes(d))
-        setState({blockDate:state.blockDate?state.blockDate+","+d:d});
+      const current=state.blockDate.split(",").filter(Boolean);
+      if(!current.includes(d)){
+        state.blockDate=state.blockDate?state.blockDate+","+d:d;
+        // タグを直接追加（rerenderしない）
+        const tag=document.createElement("div");
+        tag.style.cssText="display:flex;align-items:center;gap:4px;background:#e8eeff;border:1px solid #4a7fd4;border-radius:6px;padding:4px 8px;font-size:12px;color:"+C.accent+";";
+        tag.textContent=d;
+        const xBtn=document.createElement("button");
+        xBtn.style.cssText="background:none;border:none;color:#999;font-size:14px;line-height:1;padding:0;cursor:pointer;";
+        xBtn.textContent="×";
+        xBtn.addEventListener("click",()=>{
+          state.blockDate=state.blockDate.split(",").filter(x=>x!==d).join(",");
+          tag.remove();
+        });
+        tag.appendChild(xBtn);
+        tagContainer.appendChild(tag);
+      }
       setTimeout(()=>{di.value="";},0);
     });
     modal.appendChild(di);
-    if(state.blockDate){
-      const tags=div({display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"8px"});
-      state.blockDate.split(",").filter(Boolean).forEach(d=>{
-        const tag=div({display:"flex",alignItems:"center",gap:"4px",background:"#e8eeff",
-          border:"1px solid #4a7fd4",borderRadius:"6px",padding:"4px 8px",fontSize:"12px",color:C.accent});
-        tag.appendChild(document.createTextNode(d));
-        tag.appendChild(btn({background:"none",border:"none",color:C.muted,fontSize:"14px",lineHeight:"1",padding:"0"},
-          ()=>setState({blockDate:state.blockDate.split(",").filter(x=>x!==d).join(",")}),"×"));
-        tags.appendChild(tag);
+    const tagContainer=div({display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"8px"});
+    // 既存の日付タグを表示
+    state.blockDate.split(",").filter(Boolean).forEach(d=>{
+      const tag=document.createElement("div");
+      tag.style.cssText="display:flex;align-items:center;gap:4px;background:#e8eeff;border:1px solid #4a7fd4;border-radius:6px;padding:4px 8px;font-size:12px;color:"+C.accent+";";
+      tag.textContent=d;
+      const xBtn=document.createElement("button");
+      xBtn.style.cssText="background:none;border:none;color:#999;font-size:14px;line-height:1;padding:0;cursor:pointer;";
+      xBtn.textContent="×";
+      xBtn.addEventListener("click",()=>{
+        state.blockDate=state.blockDate.split(",").filter(x=>x!==d).join(",");
+        tag.remove();
       });
-      modal.appendChild(tags);
-    }
+      tag.appendChild(xBtn);
+      tagContainer.appendChild(tag);
+    });
+    modal.appendChild(tagContainer);
 
     // 時間帯選択
     const thead=div({display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"6px"});
