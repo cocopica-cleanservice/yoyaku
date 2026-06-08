@@ -738,15 +738,27 @@ function buildDone(){
   // 1タップで公式LINEに送信するボタン
   const calc2=calcTotal();
   const totalStr=calc2.hasUnknown?`¥${calc2.total.toLocaleString()}〜 ＋要相談`:`¥${calc2.total.toLocaleString()}〜`;
+  // クリーニング内容を箇条書きに
+  const cleaningLines=state.form.menu.map(x=>{
+    const base=AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x;
+    // このアイテムのオプションを探す
+    const itemOpts=Object.keys(state.form.opts||{}).filter(k=>k.startsWith(x+"__")).map(k=>{
+      const op=state.form.opts[k];return "　└ "+op.l+"（"+op.p+"）";
+    });
+    return ["・"+base,...itemOpts].join("\n");
+  }).join("\n");
   const lineMsg2="【仮予約が完了しました】\n"
-    +state.form.name+"様\n\n"
-    +"ご希望日時：\n"
-    +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n\n"
-    +"クリーニング内容：\n"
-    +state.form.menu.map(x=>AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x).join("、")+"\n"
-    +(Object.keys(state.form.opts||{}).length?"オプション："+Object.keys(state.form.opts).map(k=>{const op=state.form.opts[k];const itemName=k.split("__")[0];return itemName+"→"+op.l+"（"+op.p+"）";}).join("、")+"\n":"")
-    +"\n料金の目安："+totalStr+"\n\n"
-    +"スタッフよりLINEにて本予約の確定をご連絡します。\nしばらくお待ちください。\n\n"
+    +state.form.name+"様\n"
+    +"━━━━━━━━━━━━━━━\n"
+    +"📅 ご希望日時\n"
+    +state.slots.map((s,i)=>"第"+["一","二","三","四","五","六","七","八","九"][i]+"希望："+s.label).join("\n")+"\n"
+    +"━━━━━━━━━━━━━━━\n"
+    +"🧹 クリーニング内容\n"
+    +cleaningLines+"\n"
+    +"━━━━━━━━━━━━━━━\n"
+    +"💰 料金の目安："+totalStr+"\n"
+    +"━━━━━━━━━━━━━━━\n"
+    +"スタッフよりLINEにて\n本予約の確定をご連絡します。\n"
     +"※ お支払いは現金のみとなります。";
 
   const actionBox=div({background:"#fff0f0",borderRadius:"14px",padding:"18px 16px",
