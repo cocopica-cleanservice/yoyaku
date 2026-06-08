@@ -26,6 +26,9 @@ const HOURS=[9,10,11,12,13,14,15,16,17];
 const WEEKDAY=["日","月","火","水","木","金","土"];
 const AC_OPTIONS=["エアコン（壁掛け型）","エアコン（お掃除機能付き）","エアコン（天井カセット型）"];
 const MENU=["エアコン（壁掛け型）","エアコン（お掃除機能付き）","縦型洗濯機","ドラム式洗濯機","浴室・バスルーム","キッチン","レンジフード","トイレ＋洗面台","エアコン（天井カセット型）","水回り3点セット（レンジフード＋キッチン＋浴室）","水回り5点セット","その他（備考に記載）"];
+const PRICE_NOTE_DEFAULT="※ お支払いは現金のみになります。\n※ 料金は税込み表示です。";
+let PRICE_NOTE=PRICE_NOTE_DEFAULT;
+
 const FAQ_DEFAULT=[
   {q:"追加料金がかかる場合がありますか？",a:"当日の急な追加料金は発生しません。必ず、お客様に状況を事前にお知らせします。"},
   {q:"無料で駐車できる場所がない場合はどうしたらいいですか？",a:"付近の有料パーキングを使用しますが、その場合のパーキング代のご負担をお願いします。"},
@@ -964,7 +967,7 @@ function buildPriceModal(){
   });
   body.appendChild(div({padding:"12px 16px",background:"#fff8e8",borderRadius:"10px",
     border:"1px solid #f6d03a",fontSize:"12px",color:"#7a5a10",lineHeight:"1.8"},
-    "※ お支払いは現金のみになります。\n※ 料金は税込み表示です。"));
+    PRICE_NOTE));
 
   modal.appendChild(body);
   overlay.appendChild(modal);
@@ -1215,17 +1218,44 @@ function buildAdminModal(){
         border:`2px dashed ${C.accentM}`,background:"#e8eeff",
         color:C.accent,fontSize:"13px",fontWeight:"700",marginBottom:"14px"},
         ()=>{ep.push({cat:"新しいカテゴリ",items:[]});setState({editPrices:JSON.parse(JSON.stringify(ep))});},"＋ カテゴリを追加"));
+      // 注意書き編集
+
+      const notePreview=div({background:"#fff8e8",borderRadius:"10px",padding:"10px 12px",
+        border:"1px solid #f6d03a",fontSize:"12px",color:"#7a5a10",lineHeight:"1.8",
+        whiteSpace:"pre-wrap",marginBottom:"6px"});
+      notePreview.textContent=PRICE_NOTE;
+      modal.appendChild(notePreview);
+      const noteTa=h("textarea",{style:{width:"100%",padding:"10px 12px",borderRadius:"10px",
+        border:`1.5px solid ${C.border}`,fontSize:"12px",resize:"none",lineHeight:"1.8",marginBottom:"12px"},rows:"4"});
+      noteTa.value=PRICE_NOTE;
+      noteTa.addEventListener("input",e=>{
+        PRICE_NOTE=e.target.value;
+        notePreview.textContent=PRICE_NOTE;
+      });
+      modal.appendChild(noteTa);
+
       if(state.editPriceMsg) modal.appendChild(div({fontSize:"13px",color:C.accent,marginBottom:"10px"},state.editPriceMsg));
-      modal.appendChild(btn({width:"100%",padding:"13px",borderRadius:"12px",border:"none",
-        background:C.accent,color:"#fff",fontSize:"14px",fontWeight:"700",marginBottom:"10px"},
+      // プレビュー＋保存ボタン行
+      const actionBtns=div({display:"flex",gap:"8px",marginBottom:"10px"});
+      actionBtns.appendChild(btn({flex:"1",padding:"13px",borderRadius:"12px",
+        border:`1.5px solid ${C.accent}`,background:"#fff",color:C.accent,fontSize:"14px",fontWeight:"700"},
         ()=>{
-          // PRICESを完全に上書きして即時反映
+          // 一時的にPRICESに反映してから料金表モーダルを開く
+          while(PRICES.length) PRICES.pop();
+          ep.forEach(cat=>PRICES.push(JSON.parse(JSON.stringify(cat))));
+          setState({showPrice:true,priceTab:"price"});
+        },"👁 プレビュー"));
+      actionBtns.appendChild(btn({flex:"1",padding:"13px",borderRadius:"12px",border:"none",
+        background:C.accent,color:"#fff",fontSize:"14px",fontWeight:"700"},
+        ()=>{
           while(PRICES.length) PRICES.pop();
           ep.forEach(cat=>PRICES.push(JSON.parse(JSON.stringify(cat))));
           try{localStorage.setItem("cocopi_prices",JSON.stringify(PRICES));}catch(e){}
+          try{localStorage.setItem("cocopi_price_note",PRICE_NOTE);}catch(e){}
           setState({editPriceMsg:"✅ 保存しました！"});
           setTimeout(()=>setState({editPriceMsg:""}),2000);
         },"💾 保存する"));
+      modal.appendChild(actionBtns);
       modal.appendChild(btn({width:"100%",padding:"13px",borderRadius:"12px",
         border:`1.5px solid ${C.border}`,background:"#fff",color:C.mid,fontSize:"14px"},
         ()=>setState({showAdmin:false,adminUnlocked:false,adminPass:"",blockMsg:""}),"閉じる"));
@@ -1266,6 +1296,12 @@ async function initLiff(){
 initLiff();
 
 // ── 起動 ─────────────────────────────────────
+// 保存済み注意書きを復元
+try{
+  const savedNote=localStorage.getItem("cocopi_price_note");
+  if(savedNote) PRICE_NOTE=savedNote;
+}catch(e){}
+
 // 保存済み料金を完全復元
 try{
   const saved=localStorage.getItem("cocopi_prices");
