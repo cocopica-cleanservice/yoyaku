@@ -771,9 +771,10 @@ function buildDone(){
   // クリーニング内容を箇条書きに
   const cleaningLines=state.form.menu.map(x=>{
     const base=AC_OPTIONS.includes(x)?x+"×"+(state.form.count[x]||1)+"台":x;
-    // このアイテムのオプションを探す
     const itemOpts=Object.keys(state.form.opts||{}).filter(k=>k.startsWith(x+"__")).map(k=>{
-      const op=state.form.opts[k];return "　└ "+op.l+"（"+op.p+"）";
+      const op=state.form.opts[k];
+      const cnt=op.count||1;
+      return "　└ "+op.l+(cnt>1?"×"+cnt+"台":"")+"（"+op.p+")";
     });
     return ["・"+base,...itemOpts].join("\n");
   }).join("\n");
