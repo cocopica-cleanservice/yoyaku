@@ -25,7 +25,7 @@ const GAS_URL="https://script.google.com/macros/s/AKfycbwm8JZJbOeKRpFte3h6Mkr3P-
 const HOURS=[9,10,11,12,13,14,15,16,17];
 const WEEKDAY=["日","月","火","水","木","金","土"];
 const AC_OPTIONS=["エアコン（壁掛け型）","エアコン（お掃除機能付き）","エアコン（天井カセット型）"];
-const MENU=["エアコン（壁掛け型）","エアコン（お掃除機能付き）","縦型洗濯機","ドラム式洗濯機","浴室・バスルーム","キッチン","レンジフード","トイレ＋洗面台","エアコン（天井カセット型）","レンジフード＋キッチン＋浴室","水回り5点セット","その他（備考に記載）"];
+const MENU=["エアコン（壁掛け型）","エアコン（お掃除機能付き）","縦型洗濯機","ドラム式洗濯機","浴室・バスルーム","キッチン","レンジフード","トイレ＋洗面台","エアコン（天井カセット型）","水回り3点セット（レンジフード＋キッチン＋浴室）","水回り5点セット","その他（備考に記載）"];
 const FAQ_DEFAULT=[
   {q:"追加料金がかかる場合がありますか？",a:"当日の急な追加料金は発生しません。必ず、お客様に状況を事前にお知らせします。"},
   {q:"無料で駐車できる場所がない場合はどうしたらいいですか？",a:"付近の有料パーキングを使用しますが、その場合のパーキング代のご負担をお願いします。"},
@@ -43,25 +43,25 @@ const CANCEL_NOTE="※ 日程変更（日延べ）はキャンセルとなりま
 
 const PRICES=[
   {cat:"エアコン",detail:"☆★こんなお悩みはありませんか？★☆\n・送風口、ファンのカビが気になる\n・強風にしても風量が弱い、出てない\n・エアコンを使うと咳が出るようになった\n・カビの匂いが気になる\n・水漏れがする\nクリーニングで解決します！\n\n■■■■作業の流れ■■■■\n①エアコンの動作を確認\n②エアコン周りの養生\n③各部品の分解\n④エアコン本体と電装部養生\n⑤パーツの洗浄（お風呂場または屋外水栓をお借りします）\n⑥アルミフィンとファンに洗剤噴霧\n⑦エアコン内部を高圧洗浄で洗い流し、排水の確認\n⑧各部品の組み立て\n⑨エアコンの動作を最終確認\n\n高圧洗浄機も比較的静かなものを使用し、騒音にも配慮しておりますのでご安心ください！\nパーツ洗浄でお借りしたスペースはしっかり原状回復しますのでご安心ください！",items:[
-    {name:"エアコン（壁掛け型）",price:"¥8,000〜",detail:"◆作業内容\n外装カバーの清掃 / フィルターの洗浄 / 本体内部の高圧洗浄 / ドレンパンの洗浄 / 作業場所の簡易清掃\n\n◆作業時間の目安\n約60分/台\n※汚れ具合やエアコンの設置状況により前後します。",opts:[{l:"防カビコート",p:"+¥1,000"},{l:"室外機",p:"+¥3,000"}]},
-    {name:"エアコン（お掃除機能付き）",price:"¥14,000〜",detail:"◆作業内容\n外装カバーの清掃 / フィルターの洗浄 / 本体内部の高圧洗浄 / ドレンパンの洗浄 / 作業場所の簡易清掃\n\n◆作業時間の目安\n約100分/台\n※汚れ具合やエアコンの設置状況により前後します。\n\n〈お掃除機能付きエアコンの注意事項〉\nエアコンと左右上下の隙間が狭い場合、ロボを取り外せない場合があります。状況によっては作業困難によりお断りする場合がございますので、予めご了承ください。壁との間に拳が入るか試してみて下さい。",opts:[{l:"防カビコート",p:"+¥1,000"},{l:"室外機",p:"+¥3,000"}]},
+    {name:"エアコン（壁掛け型）",price:"¥8,000〜",detail:"◆作業内容\n外装カバーの清掃 / フィルターの洗浄 / 本体内部の高圧洗浄 / ドレンパンの洗浄 / 作業場所の簡易清掃\n\n◆作業時間の目安\n約60分/台\n※汚れ具合やエアコンの設置状況により前後します。",opts:[{l:"防カビコート",p:"+¥1,000",countable:true},{l:"室外機",p:"+¥3,000",countable:true}]},
+    {name:"エアコン（お掃除機能付き）",price:"¥14,000〜",detail:"◆作業内容\n外装カバーの清掃 / フィルターの洗浄 / 本体内部の高圧洗浄 / ドレンパンの洗浄 / 作業場所の簡易清掃\n\n◆作業時間の目安\n約100分/台\n※汚れ具合やエアコンの設置状況により前後します。\n\n〈お掃除機能付きエアコンの注意事項〉\nエアコンと左右上下の隙間が狭い場合、ロボを取り外せない場合があります。状況によっては作業困難によりお断りする場合がございますので、予めご了承ください。壁との間に拳が入るか試してみて下さい。",opts:[{l:"防カビコート",p:"+¥1,000",countable:true},{l:"室外機",p:"+¥3,000",countable:true}]},
     {name:"エアコン（天井カセット型）",price:"お問い合わせ",opts:[]},
     {name:"業務用エアコン",price:"お問い合わせ",note:"※横幅90cm以上の壁掛けエアコン",opts:[]},
   ]},
   {cat:"洗濯機",items:[
-    {name:"縦型洗濯機",price:"¥14,000〜",detail:"◆作業内容\n洗濯槽の取り外し洗浄（分解洗浄）/ 洗濯機本体の内側・外側 / 洗濯パン / 作業場所の簡易清掃\n\n◆作業時間の目安\n・乾燥機無し 約150分/台\n・乾燥機付き 約180分/台\n・DX、12kg 約240分/台\n※汚れ具合や洗濯機の機種により前後します。\n\n汚れによる追加料金はございませんので、ご安心ください！\n\n〈作業についての注意事項〉\n・ボルトの錆や劣化、汚れの固着によって洗濯槽やパルセーターが外れない場合がございます。その際はキャンセルではなく、高圧洗浄機での対応になりますので、予めご了承下さい。\n・10kg以上は重量があり動かせない場合、洗濯パンの掃除が困難なことがありますので、予めご了承下さい。\n・ワセリンや軟骨を多く使われている場合、完全に落としきることが難しいので、予めご了承下さい。",opts:[{l:"乾燥付き",p:"+¥3,000"},{l:"日立BW（乾燥無し）",p:"+¥2,000"},{l:"日立BW（乾燥付き）",p:"+¥5,000"},{l:"日立BW DXシリーズ",p:"+¥10,000"}]},
-    {name:"ドラム式洗濯機",price:"¥25,000〜",caution:"⚠️ 対象外：AQUA・IRIS OYAMA・2010年製以前",opts:[{l:"東芝・シャープ製",p:"+¥2,000"}],detail:"◆作業内容\n洗濯槽の分解洗浄（取り外しなし）/ 洗濯機本体の内側・外側 / 作業場所の簡易清掃\n\n〈作業についての注意事項〉\n・ドラム式洗濯機はかなりの重量があるため、基本動かさず、そのまま作業します。洗濯パンや排水溝が隠れてしまっている場合、お手入れすることが難しいですので、予めご了承下さい。\n・東芝製はコーキングの打ち直しが必要な為、作業後半日以上乾燥させる必要がございますので、予めご了承ください。\n・ワセリンや軟骨を多く使われている場合、完全に落としきることが難しいので、予めご了承下さい。"},
+    {name:"縦型洗濯機",price:"¥14,000〜",detail:"◆作業内容\n洗濯槽の取り外し洗浄（分解洗浄）/ 洗濯機本体の内側・外側 / 洗濯パン / 作業場所の簡易清掃\n\n◆作業時間の目安\n・乾燥機無し 約150分/台\n・乾燥機付き 約180分/台\n・DX、12kg 約240分/台\n※汚れ具合や洗濯機の機種により前後します。\n\n汚れによる追加料金はございませんので、ご安心ください！\n\n〈作業についての注意事項〉\n・ボルトの錆や劣化、汚れの固着によって洗濯槽やパルセーターが外れない場合がございます。その際はキャンセルではなく、高圧洗浄機での対応になりますので、予めご了承下さい。\n・10kg以上は重量があり動かせない場合、洗濯パンの掃除が困難なことがありますので、予めご了承下さい。\n・ワセリンや軟骨を多く使われている場合、完全に落としきることが難しいので、予めご了承下さい。",opts:[{l:"乾燥付き",p:"+¥3,000"},{l:"日立BW（乾燥無し）",p:"+¥2,000"},{l:"日立BW（乾燥付き）",p:"+¥5,000"},{l:"日立BW DXシリーズ",p:"+¥10,000"},{l:"防カビコート",p:"+¥1,000"}]},
+    {name:"ドラム式洗濯機",price:"¥25,000〜",caution:"⚠️ 対象外：AQUA・IRIS OYAMA・2010年製以前",opts:[{l:"東芝・シャープ製",p:"+¥2,000"},{l:"防カビコート",p:"+¥1,000"}],detail:"◆作業内容\n洗濯槽の分解洗浄（取り外しなし）/ 洗濯機本体の内側・外側 / 作業場所の簡易清掃\n\n〈作業についての注意事項〉\n・ドラム式洗濯機はかなりの重量があるため、基本動かさず、そのまま作業します。洗濯パンや排水溝が隠れてしまっている場合、お手入れすることが難しいですので、予めご了承下さい。\n・東芝製はコーキングの打ち直しが必要な為、作業後半日以上乾燥させる必要がございますので、予めご了承ください。\n・ワセリンや軟骨を多く使われている場合、完全に落としきることが難しいので、予めご了承下さい。"},
 
   ]},
   {cat:"水回り",items:[
-    {name:"浴室・バスルーム",price:"¥14,000",note:"鏡/浴槽/天井/照明/窓/蛇口/シャワー/壁面/床/扉/排水口",opts:[]},
+    {name:"浴室・バスルーム",price:"¥14,000",note:"鏡/浴槽/天井/照明/窓/蛇口/シャワー/壁面/床/扉/排水口",opts:[{l:"防カビコート",p:"+¥2,000"}]},
     {name:"キッチン",price:"¥12,000",note:"シンク/ガスコンロ/戸棚表面/蛇口/壁面/グリル/排水口",opts:[]},
     {name:"レンジフード",price:"¥12,000",note:"カバー/本体内部/ファン/フィルター ※キッチンの壁は含まれません",opts:[]},
     {name:"トイレ＋洗面台",price:"¥13,000",note:"2点セット価格",opts:[]},
     {name:"窓ガラス・サッシ・ベランダ",price:"お問い合わせ",opts:[]},
   ]},
   {cat:"セットメニュー（お得！）",items:[
-    {name:"レンジフード＋キッチン＋浴室",price:"¥34,000",note:"セットなら通常より大幅お得！",opts:[]},
+    {name:"水回り3点セット（レンジフード＋キッチン＋浴室）",price:"¥34,000",note:"セットなら通常より大幅お得！",opts:[]},
     {name:"水回り5点セット",price:"¥42,000",note:"浴室・キッチン・レンジフード・トイレ・洗面台",opts:[{l:"トイレ追加",p:"+¥5,000"}]},
   ]},
   {cat:"その他",items:[
@@ -96,7 +96,12 @@ function calcTotal(){
   });
   Object.values(state.form.opts||{}).forEach(op=>{
     const m=op.p.replace(/,/g,"").match(/[\d]+/);
-    if(m){total+=parseInt(m[0]);lines.push({label:op.l,price:op.p});}
+    const cnt=op.count||1;
+    if(m){
+      total+=parseInt(m[0])*cnt;
+      const priceStr=cnt>1?op.p+"×"+cnt+"台":op.p;
+      lines.push({label:op.l+(cnt>1?"×"+cnt+"台":""),price:priceStr});
+    }
   });
   return {total,hasUnknown,lines};
 }
@@ -617,18 +622,43 @@ function buildForm(){
         priceItem.opts.forEach(op=>{
           const key=item+"__"+op.l;
           const selOpt=(state.form.opts||{})[key];
+          const opRow=div({marginBottom:"3px"});
           const opBtn=btn({width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",
             borderRadius:"6px",padding:"6px 8px",border:`1px solid ${selOpt?C.accent:C.border}`,
-            background:selOpt?C.accentL:C.card,marginBottom:"3px"},
+            background:selOpt?C.accentL:C.card},
             ()=>{
               const newOpts={...state.form.opts};
               if(newOpts[key]) delete newOpts[key];
-              else newOpts[key]=op;
+              else newOpts[key]={...op,count:1};
               setState({form:{...state.form,opts:newOpts}});
             },null);
           opBtn.appendChild(div({fontSize:"11px",color:selOpt?C.accent:C.mid},(selOpt?"✓ ":"")+op.l));
           opBtn.appendChild(div({fontSize:"11px",fontWeight:"700",color:C.warn},op.p));
-          optWrap.appendChild(opBtn);
+          opRow.appendChild(opBtn);
+          // 台数選択（countableかつ選択中の場合）
+          if(op.countable&&selOpt){
+            const cnt=div({display:"flex",alignItems:"center",gap:"6px",padding:"3px 8px",
+              background:"#f0f4ff",borderRadius:"0 0 6px 6px",border:`1px solid ${C.accentM}`,borderTop:"none"});
+            cnt.appendChild(div({fontSize:"10px",color:C.accent},"台数"));
+            cnt.appendChild(btn({width:"20px",height:"20px",borderRadius:"4px",border:`1px solid ${C.accentM}`,
+              background:C.card,color:C.accent,fontSize:"13px",display:"flex",alignItems:"center",justifyContent:"center"},
+              ()=>{
+                const newOpts={...state.form.opts};
+                newOpts[key]={...newOpts[key],count:Math.max(1,(newOpts[key].count||1)-1)};
+                setState({form:{...state.form,opts:newOpts}});
+              },"－"));
+            cnt.appendChild(div({fontSize:"13px",fontWeight:"700",color:C.accent,minWidth:"16px",textAlign:"center"},String(selOpt.count||1)));
+            cnt.appendChild(btn({width:"20px",height:"20px",borderRadius:"4px",border:`1px solid ${C.accentM}`,
+              background:C.card,color:C.accent,fontSize:"13px",display:"flex",alignItems:"center",justifyContent:"center"},
+              ()=>{
+                const newOpts={...state.form.opts};
+                newOpts[key]={...newOpts[key],count:(newOpts[key].count||1)+1};
+                setState({form:{...state.form,opts:newOpts}});
+              },"＋"));
+            cnt.appendChild(div({fontSize:"10px",color:C.accent},"台"));
+            opRow.appendChild(cnt);
+          }
+          optWrap.appendChild(opRow);
         });
         wrap2.appendChild(optWrap);
       }
@@ -665,7 +695,7 @@ function buildConfirm(){
     ["ご住所",state.form.address],
     ["電話番号",state.form.phone],
     ["希望日時",state.slots.map((s,i)=>`第${["一","二","三","四","五","六","七","八","九"][i]||i+1}希望：${s.label}`).join("\n")],
-    ["クリーニング",menuLabel+(Object.keys(state.form.opts||{}).length?`\nオプション：${Object.keys(state.form.opts).map(k=>{const op=state.form.opts[k];const itemName=k.split("__")[0];return itemName+"→"+op.l+"（"+op.p+"）";}).join("、")}`:"")+(state.form.note?`\n備考：${state.form.note}`:"")],
+    ["クリーニング",menuLabel+(Object.keys(state.form.opts||{}).length?`\nオプション：${Object.keys(state.form.opts).map(k=>{const op=state.form.opts[k];const itemName=k.split("__")[0];const cnt=op.count||1;return itemName+"→"+op.l+(cnt>1?"×"+cnt+"台":"")+"（"+op.p+"）";}).join("、")}`:"")+(state.form.note?`\n備考：${state.form.note}`:"")],
   ].forEach(([label,value],i,arr)=>{
     const row=div({display:"flex",gap:"12px",padding:"13px 16px",
       borderBottom:i<arr.length-1?`1px solid ${C.border}`:"none"});
