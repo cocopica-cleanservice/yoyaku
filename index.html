@@ -29,6 +29,13 @@ const MENU=["エアコン（壁掛け型）","エアコン（お掃除機能付�
 const PRICE_NOTE_DEFAULT="※ お支払いは現金のみになります。\n※ 料金は税込み表示です。";
 let PRICE_NOTE=PRICE_NOTE_DEFAULT;
 
+// クーポンデータ（管理画面で設定）
+let COUPONS=[];
+try{
+  const saved=localStorage.getItem("cocopi_coupons");
+  if(saved) COUPONS=JSON.parse(saved);
+}catch(e){}
+
 const FAQ_DEFAULT=[
   {q:"追加料金がかかる場合がありますか？",a:"当日の急な追加料金は発生しません。必ず、お客様に状況を事前にお知らせします。"},
   {q:"無料で駐車できる場所がない場合はどうしたらいいですか？",a:"付近の有料パーキングを使用しますが、その場合のパーキング代のご負担をお願いします。"},
@@ -106,6 +113,11 @@ function calcTotal(){
       lines.push({label:op.l+(cnt>1?"×"+cnt+"台":""),price:priceStr});
     }
   });
+  // クーポン割引
+  if(state.form.couponDiscount>0){
+    total=Math.max(0,total-state.form.couponDiscount);
+    lines.push({label:`クーポン割引（${state.form.coupon}）`,price:`-¥${state.form.couponDiscount.toLocaleString()}`});
+  }
   return {total,hasUnknown,lines};
 }
 
@@ -147,6 +159,8 @@ async function submitReservation(){
       cleaning:state.form.menu.map(x=>AC_OPTIONS.includes(x)?`${x}×${state.form.count[x]||1}台`:x),
       cleaningNote:state.form.note,
         options:Object.keys(state.form.opts||{}).map(k=>{const op=state.form.opts[k];return k.split("__")[0]+"→"+op.l+"（"+op.p+"）";}).join("、"),
+        coupon:state.form.coupon||"",
+        couponDiscount:state.form.couponDiscount||0,
         total:(()=>{const c=calcTotal();return c.hasUnknown?"¥"+c.total.toLocaleString()+"〜 ＋要相談":"¥"+c.total.toLocaleString()+"〜";})(),
         lineUserId:lineUserId,
     })});
@@ -223,7 +237,7 @@ function validate(){
   return !Object.keys(e).length;
 }
 
-function reset(){setState({step:"cal",selDate:null,slots:[],form:{name:"",kana:"",address:"",phone:"",zip:"",menu:[],count:{},opts:{},note:""},errors:{}});}
+function reset(){setState({step:"cal",selDate:null,slots:[],form:{name:"",kana:"",address:"",phone:"",zip:"",menu:[],count:{},opts:{},note:"",coupon:"",couponDiscount:0},errors:{}});}
 
 // ── HTML生成ヘルパー ──────────────────────────
 function h(tag,attrs,children){
@@ -672,6 +686,39 @@ function buildForm(){
   mf.appendChild(ta({width:"100%",padding:"11px 12px",borderRadius:"10px",
     border:`1.5px solid ${C.border}`,fontSize:"14px",resize:"none",lineHeight:"1.7"},
     state.form.note,v=>{state.form.note=v;},2,"オプションや詳細・ご要望など（任意）"));
+
+  // クーポン入力
+  const couponWrap=div({marginTop:"10px",padding:"12px",background:"#fff8e8",
+    borderRadius:"10px",border:"1px solid #f6d03a"});
+  couponWrap.appendChild(div({fontSize:"12px",fontWeight:"700",color:"#7a5a10",marginBottom:"8px"},"🎫 クーポンコード（任意）"));
+  const couponRow=div({display:"flex",gap:"8px",alignItems:"center"});
+  const couponInp=h("input",{type:"text",placeholder:"コードを入力",
+    style:{flex:"1",padding:"10px 12px",borderRadius:"10px",
+      border:`1.5px solid ${state.form.coupon&&state.form.couponDiscount>0?"#27ae60":C.border}`,
+      fontSize:"14px",textTransform:"uppercase"}});
+  couponInp.value=state.form.coupon||"";
+  couponInp.addEventListener("change",e=>{state.form.coupon=e.target.value.toUpperCase();});
+  const couponBtn=btn({padding:"10px 14px",borderRadius:"10px",border:"none",
+    background:"#f6d03a",color:"#7a5a10",fontSize:"13px",fontWeight:"700",whiteSpace:"nowrap"},
+    ()=>{
+      const code=(state.form.coupon||couponInp.value).toUpperCase().trim();
+      state.form.coupon=code;
+      const found=COUPONS.find(c=>c.code===code&&c.active);
+      if(found){
+        setState({form:{...state.form,coupon:code,couponDiscount:found.discount}});
+      } else {
+        setState({form:{...state.form,coupon:code,couponDiscount:0}});
+        alert("クーポンコードが無効です");
+      }
+    },"適用");
+  couponRow.appendChild(couponInp);
+  couponRow.appendChild(couponBtn);
+  couponWrap.appendChild(couponRow);
+  if(state.form.couponDiscount>0){
+    couponWrap.appendChild(div({fontSize:"12px",color:"#27ae60",fontWeight:"700",marginTop:"6px"},
+      `✅ -¥${state.form.couponDiscount.toLocaleString()} 割引が適用されます！`));
+  }
+  card.appendChild(couponWrap);
   card.appendChild(mf);
   wrap.appendChild(card);
 
@@ -1260,6 +1307,59 @@ function buildAdminModal(){
         border:`1.5px solid ${C.border}`,background:"#fff",color:C.mid,fontSize:"14px"},
         ()=>setState({showAdmin:false,adminUnlocked:false,adminPass:"",blockMsg:""}),"閉じる"));
     } // end price tab
+
+    if(state.adminTab==="coupon"){
+      modal.appendChild(div({fontSize:"12px",color:C.muted,marginBottom:"14px"},"クーポンコードを管理します。"));
+      // 既存クーポン一覧
+      COUPONS.forEach((c,i)=>{
+        const row=div({display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",
+          background:c.active?C.accentL:"#f5f5f5",borderRadius:"10px",marginBottom:"8px",
+          border:`1px solid ${c.active?C.accentM:C.border}`});
+        const codeLabel=div({flex:"1"});
+        codeLabel.appendChild(div({fontSize:"13px",fontWeight:"700",color:c.active?C.accent:C.muted},c.code));
+        codeLabel.appendChild(div({fontSize:"11px",color:C.muted},`-¥${c.discount.toLocaleString()} ${c.active?"有効":"無効"}`));
+        row.appendChild(codeLabel);
+        // 有効/無効切り替え
+        row.appendChild(btn({padding:"5px 10px",borderRadius:"6px",fontSize:"11px",fontWeight:"700",
+          border:`1px solid ${c.active?C.warn:C.accent}`,background:"#fff",
+          color:c.active?C.warn:C.accent},
+          ()=>{COUPONS[i].active=!COUPONS[i].active;try{localStorage.setItem("cocopi_coupons",JSON.stringify(COUPONS));}catch(e){}setState({adminTab:"coupon"});},
+          c.active?"停止":"有効化"));
+        // 削除
+        row.appendChild(btn({padding:"5px 8px",borderRadius:"6px",fontSize:"11px",
+          border:"1px solid #ffaaaa",background:"#fff8f8",color:"#c0392b"},
+          ()=>{if(confirm(`「${c.code}」を削除しますか？`)){COUPONS.splice(i,1);try{localStorage.setItem("cocopi_coupons",JSON.stringify(COUPONS));}catch(e){}setState({adminTab:"coupon"});}},"✕"));
+        modal.appendChild(row);
+      });
+      // 新規クーポン追加
+      modal.appendChild(div({fontSize:"13px",fontWeight:"700",color:C.mid,marginTop:"12px",marginBottom:"8px"},"➕ 新規クーポン作成"));
+      const newCode=h("input",{type:"text",placeholder:"コード（例：WELCOME500）",
+        style:{width:"100%",padding:"10px 12px",borderRadius:"10px",border:`1.5px solid ${C.border}`,
+          fontSize:"14px",marginBottom:"8px",textTransform:"uppercase"}});
+      modal.appendChild(newCode);
+      const discountRow=div({display:"flex",gap:"8px",alignItems:"center",marginBottom:"12px"});
+      const newDiscount=h("input",{type:"number",placeholder:"割引金額（円）",
+        style:{flex:"1",padding:"10px 12px",borderRadius:"10px",border:`1.5px solid ${C.border}`,fontSize:"14px"}});
+      discountRow.appendChild(newDiscount);
+      discountRow.appendChild(div({fontSize:"13px",color:C.mid},"円引き"));
+      modal.appendChild(discountRow);
+      modal.appendChild(btn({width:"100%",padding:"13px",borderRadius:"12px",border:"none",
+        background:C.accent,color:"#fff",fontSize:"14px",fontWeight:"700",marginBottom:"10px"},
+        ()=>{
+          const code=newCode.value.toUpperCase().trim();
+          const discount=parseInt(newDiscount.value);
+          if(!code){alert("コードを入力してください");return;}
+          if(!discount||discount<=0){alert("割引金額を入力してください");return;}
+          if(COUPONS.find(c=>c.code===code)){alert("同じコードが既にあります");return;}
+          COUPONS.push({code,discount,active:true});
+          try{localStorage.setItem("cocopi_coupons",JSON.stringify(COUPONS));}catch(e){}
+          newCode.value="";newDiscount.value="";
+          setState({adminTab:"coupon"});
+        },"作成する"));
+      modal.appendChild(btn({width:"100%",padding:"13px",borderRadius:"12px",
+        border:`1.5px solid ${C.border}`,background:"#fff",color:C.mid,fontSize:"14px"},
+        ()=>setState({showAdmin:false,adminUnlocked:false,adminPass:"",blockMsg:""}),"閉じる"));
+    } // end coupon tab
   }
   overlay.appendChild(modal);
   return overlay;
