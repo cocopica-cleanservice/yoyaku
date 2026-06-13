@@ -1042,7 +1042,7 @@ function buildAdminModal(){
   } else {
     // タブ
     const tabs=div({display:"flex",gap:"8px",marginBottom:"16px"});
-    [["block","🔒 ブロック"],["price","💰 料金編集"]].forEach(([tab,label])=>{
+    [["block","🔒 ブロック"],["price","💰 料金編集"],["coupon","🎫 クーポン"]].forEach(([tab,label])=>{
       tabs.appendChild(btn({flex:"1",padding:"10px",borderRadius:"10px",border:"none",
         background:state.adminTab===tab?C.accent:"#f0f4ff",
         color:state.adminTab===tab?"#fff":C.mid,fontSize:"13px",fontWeight:"700"},
