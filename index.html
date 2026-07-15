@@ -254,7 +254,7 @@ function validate(){
   if(!(state.form.kana||"").trim())e.kana="ふりがなを入力してください";
   if(!(state.form.address||"").trim())e.address="ご住所を入力してください";
   if(!(state.form.phone||"").trim())e.phone="お電話番号を入力してください";
-  if(!state.slots.length)e.slots="希望日時を1つ以上選んでください";
+  if(state.slots.length<3)e.slots="希望日時を第三希望まで選択してください";
   if(!state.form.menu.length)e.menu="クリーニング内容を選んでください";
   setState({errors:e});
   return !Object.keys(e).length;
