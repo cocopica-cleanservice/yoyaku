@@ -370,7 +370,7 @@ function buildHeader(){
   if(state.step==="cal"&&state.slots.length>0){
     rightBtn.appendChild(btn({background:C.accentM,border:"none",color:"#fff",borderRadius:"8px",
       padding:"6px 10px",fontSize:"12px",fontWeight:"700"},
-      ()=>setState({step:"form"}),`次へ (${state.slots.length})`));
+      ()=>{if(state.slots.length<3){alert("第三希望まで選択してください");return;}setState({step:"form"})},`次へ (${state.slots.length})`));
   } else if(state.step==="cal"){
     // 🔒は右下固定に移動
   }
@@ -543,7 +543,7 @@ function buildCal(){
     });
     slist.appendChild(btn({width:"100%",marginTop:"12px",padding:"13px",borderRadius:"10px",border:"none",
       background:C.accent,color:"#fff",fontSize:"14px",fontWeight:"700",
-      boxShadow:"0 3px 12px rgba(26,79,160,0.3)"},()=>{setState({step:"form"});setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),50);},"お客様情報を入力する →"));
+      boxShadow:"0 3px 12px rgba(26,79,160,0.3)"},()=>{if(state.slots.length<3){alert("第三希望まで選択してください");return;}setState({step:"form"});setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),50);},"お客様情報を入力する →"));
     wrap.appendChild(slist);
   }
   return wrap;
